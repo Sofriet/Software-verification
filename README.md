@@ -1,6 +1,6 @@
 # Software-verification
 Created a NuSMV (https://nusmv.fbk.eu/) elevator simulation
-<br> with Daniël Schenk
+<br> with Daniël Schenk <br>
 Feedback:<br>
 - 2pts for the basic requirements.
 - 1pt for the additional requirement, note that 5 and 7 are exactly the same, so I have only given points for one of the two.
