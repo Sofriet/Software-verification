@@ -8,7 +8,7 @@ Feedback:<br>
 - 2pts for additional features: distinguishing between up/down requests and elevator moves in a direction until reaching the requested floor.
 - 2pts for all requirements being successfully checked.
 - 0.5pts for an elevator with 7 floors.
-total 10/12 points
+<br>Total 10/12 points
 
 
 
