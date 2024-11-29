@@ -1,0 +1,92 @@
+MODULE main
+
+VAR
+  c: process control_software();
+  e: process elevator();
+
+ASSIGN
+  init(c.RequestUpFloor) := 1;
+  init(c.RequestDownFloor) := 1;
+  init(e.ElevOnFloor) := 1;
+  init(e.OpenDoors) := FALSE;
+  init(e.ElevMovingUp) := FALSE;
+  init(e.ElevMovingDown) := FALSE;
+  init(c.PendingRequestUp) := FALSE;
+  init(c.PendingRequestDown) := FALSE;
+
+next(c.RequestUpFloor) :=
+    case
+      c.RequestUpFloor <= 6 & !c.PendingRequestDown & c.RequestUpFloor + 1 > e.ElevOnFloor: c.RequestUpFloor + 1;
+      TRUE : e.ElevOnFloor;
+    esac;
+
+next(c.RequestDownFloor) :=
+    case
+      c.RequestDownFloor > 1 & !c.PendingRequestUp & c.RequestUpFloor - 1 < e.ElevOnFloor: c.RequestDownFloor - 1;
+      TRUE : e.ElevOnFloor;
+    esac;
+
+next(e.ElevOnFloor) :=
+  case
+    e.ElevMovingUp & e.ElevOnFloor < 7: e.ElevOnFloor + 1;
+    e.ElevMovingDown & e.ElevOnFloor > 1: e.ElevOnFloor - 1;
+    TRUE : e.ElevOnFloor;
+  esac;
+
+next(e.OpenDoors) :=
+  case
+    !e.ElevMovingUp & !e.ElevMovingDown & (c.RequestDownFloor = e.ElevOnFloor | c.RequestUpFloor = e.ElevOnFloor) : TRUE;
+    TRUE : FALSE;
+  esac;
+
+next(e.ElevMovingDown) :=
+  case
+    c.PendingRequestDown & c.RequestDownFloor < e.ElevOnFloor & !c.PendingRequestUp & !e.ElevMovingUp: TRUE;
+    TRUE : FALSE;
+  esac;
+
+next(e.ElevMovingUp) :=
+  case
+    c.PendingRequestUp & c.RequestUpFloor > e.ElevOnFloor & !c.PendingRequestDown & !e.ElevMovingDown: TRUE;
+    TRUE : FALSE;
+  esac;
+
+next(c.PendingRequestUp) :=
+  case
+    c.RequestUpFloor > e.ElevOnFloor & !c.PendingRequestDown : TRUE;
+    TRUE : FALSE;
+  esac;
+
+next(c.PendingRequestDown) :=
+  case
+    c.RequestDownFloor <= e.ElevOnFloor & !c.PendingRequestUp : TRUE;
+    TRUE : FALSE;
+  esac;
+
+LTLSPEC G((e.ElevOnFloor != c.RequestDownFloor & e.ElevOnFloor != c.RequestUpFloor) -> !e.OpenDoors)
+LTLSPEC G(!c.PendingRequestUp -> !e.ElevMovingUp)
+LTLSPEC G(!c.PendingRequestDown -> !e.ElevMovingDown)
+
+LTLSPEC G(c.PendingRequestDown & c.RequestDownFloor < e.ElevOnFloor -> F (e.ElevOnFloor = c.RequestDownFloor))
+LTLSPEC G(c.PendingRequestUp & c.RequestUpFloor > e.ElevOnFloor -> F (e.ElevOnFloor = c.RequestUpFloor))
+
+MODULE elevator()
+VAR
+  ElevOnFloor : 1..7;
+  ElevMovingUp : boolean;
+  ElevMovingDown : boolean;
+  OpenDoors : boolean;
+
+LTLSPEC G(!(ElevMovingDown & ElevMovingUp))
+
+MODULE control_software()
+VAR
+  RequestUpFloor : 1..7;
+  RequestDownFloor : 1..7;
+  PendingRequestUp : boolean;
+  PendingRequestDown : boolean;
+
+LTLSPEC G(!(PendingRequestUp & PendingRequestDown))
+
+
+
