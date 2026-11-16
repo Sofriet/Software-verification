@@ -1,8 +1,5 @@
 from sys import settrace
 from typing import Callable
-from html.parser import HTMLParser
-from mutator import Mutator
-import random
 
 
 class Coverage:
